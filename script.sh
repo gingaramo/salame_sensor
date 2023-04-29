@@ -1,10 +1,21 @@
 #!/bin/bash
 
+# Ensure these environment variables exist
+if [ -z "$salame_feed_id" ]; then
+  echo "salame_feed_id environment variable is not defined"
+fi
+if [ -z "$salame_script_full_path" ]; then
+  echo "script_full_path environment variable is not defined"
+fi
+if [ -z "$iotplotter_api_key" ]; then
+  echo "iotplotter_api_key environment variable is not defined"
+fi
+
 # Set the URL to which the POST request will be sent
-url=http://iotplotter.com/api/v2/feed/809378137363634641.csv
+url=http://iotplotter.com/api/v2/feed/$salame_feed_id.csv
 
 # Run the Python program and capture the first two lines of output (temp and humidity)
-output=$(python /home/gaston/Salame/run.py | head -n 2)
+output=$(python $salame_script_full_path/read_sensor.py | head -n 2)
 
 # Assign the first line
 temperature=$(echo "$output" | sed -n 1p)
@@ -24,5 +35,5 @@ EOF
 
 echo "data: $data"
 logger $data
-wget -O /dev/null --post-data="$data" --header="api-key: 22535ff29fc1949a72bca65267621d0416c948090d" "$url"
+wget -O /dev/null --post-data="$data" --header="api-key: $iotplotter_api_key" "$url"
 
